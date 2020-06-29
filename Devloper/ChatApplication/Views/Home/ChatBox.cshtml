@@ -1,0 +1,145 @@
+﻿@model IEnumerable<ChatApplication.Models.UserModel>
+
+@{
+    ViewBag.Title = "ChatBox";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>ChatBox</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model)
+{
+    <tr id="@item.Id">
+        <td onclick="SendMessage('@item.Id','@item.Name')">
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+    </tr>
+}
+</table>
+
+
+<table align="left">
+    <tr>
+      
+        <td>
+            <label id="frname"></label><input type="text" id="msgfrom" name="msgs" />
+            <input type="button" id="submit1" name="submit1" onclick="Message()" />
+        </td>
+    </tr>
+
+</table>
+<table align="center">
+    <tr>
+        
+        <td>
+           <label id="name"></label> <input type="text" id="msgto" name="msgs" />
+            <input type="button" id="submit" name="submit" onclick="Messages()" />
+        </td>
+    </tr>
+
+</table>
+
+<div id="render">
+</div>
+<input type="hidden" id="FromId" />
+<input type="hidden" id="Fromname" />
+<input type="hidden" id="Toid" />
+
+<script>
+    function SendMessage(id,name) {
+     
+        if( $('#Fromname').val()==""){
+            $('#FromId').val(id);
+            $('#' + id).hide();
+        $('#Fromname').val(name);
+        $('#frname').html(name + " :-");
+        }
+        else {
+            $('#Toid').val(id);
+            $('#name').html(name + " :-");
+        }
+
+        if(  $('#FromId').val()!="" &&  $('#Toid').val()!=""){
+        $.ajax
+        ({
+            type: "Post",
+            url: '/Home/GetMessage',
+            cache: false,
+            data: '{MsgTo:"' + $('#Toid').val() + '",MsgFrom:"' + $('#FromId').val() + '"}',
+            contentType: "application/Json; charset=UTF-8",
+            dataType: "Json", //
+            success: function (html) {
+                var a = '';
+                for (var i = 0; i < html.length; i++) {
+                    a += '<table align="center"><tr><td>' + html[i].MessageTo + '</td><tdalign="center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>' + html[i].FromName + '</td><td>' + html[i].MessageFrom + '</td></tr></table>'
+                }
+                $('#render').html(a);
+        },
+            error: function (xhr, status, error) {
+            alert(Error);
+        }
+        });
+        }
+    }
+    function Message() {
+        $.ajax
+    ({
+        type: "Post",
+        url: '/Home/MessageSend',
+        cache: false,
+        data: '{Message:"' + $('#msgto').val() + '",MsgTo:"' + $('#Toid').val() + '",MsgFrom:"' + $('#FromId').val() + '",MessageFrom:"' + $('#msgfrom').val() + '"}',
+        contentType: "application/Json; charset=UTF-8",
+        dataType: "Json", //
+        success: function (html) {
+            var a = '';
+            for (var i = 0; i < html.length; i++) {
+                a += '<table align="center"><tr><td>' + html[i].MessageTo + '</td><tdalign="center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>' + html[i].FromName + '</td><td>' + html[i].MessageFrom + '</td></tr></table>'
+            }
+            $('#render').html(a);
+            $('#msgfrom').val("");
+            $('#msgto').val("");
+        },
+        error: function (xhr, status, error) {
+            alert(Error);
+        }
+
+    });
+    }
+
+    function Messages() {
+        $.ajax
+    ({
+        type: "Post",
+        url: '/Home/MessageSend',
+        cache: false,
+        data: '{Message:"' + $('#msgfrom').val() + '",MsgTo:"' + $('#FromId').val() + '",MsgFrom:"' + $('#Toid').val() + '",MessageFrom:"' + $('#msgto').val() + '"}',
+        contentType: "application/Json; charset=UTF-8",
+        dataType: "Json", //
+        success: function (html) {
+            var a = '';
+            for (var i = 0; i < html.length; i++) {
+                a += '<table align="center"><tr><td>' + html[i].MessageTo + '</td><tdalign="center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>' + html[i].FromName + '</td><td>' + html[i].MessageFrom + '</td></tr></table>'
+            }
+            $('#render').html(a);
+            $('#msgfrom').val("");
+            $('#msgto').val("");
+        },
+        error: function (xhr, status, error) {
+            alert(Error);
+        }
+
+    });
+    }
+
+</script>
